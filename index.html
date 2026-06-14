@@ -733,12 +733,17 @@
       document.getElementById("progress-fill").style.width = pct + "%";
     });
 
-    // answers
+    // answers (shuffle display order each time the question is shown, while
+    // keeping each button tied to its original option index so correctness
+    // and the explanation always match the right answer)
     const answersEl = document.getElementById("answers");
     answersEl.innerHTML = "";
-    q.options.forEach((opt, idx) => {
+    const displayOrder = shuffle(q.options.map((_, idx) => idx));
+    displayOrder.forEach(idx => {
+      const opt = q.options[idx];
       const btn = document.createElement("button");
       btn.className = "answer-btn";
+      btn.dataset.optionIndex = String(idx);
 
       const textSpan = document.createElement("span");
       textSpan.className = "answer-text";
@@ -771,7 +776,8 @@
     if (isCorrect) score++;
     updateScorePill();
 
-    buttons.forEach((btn, idx) => {
+    buttons.forEach(btn => {
+      const idx = Number(btn.dataset.optionIndex);
       btn.disabled = true;
       const opt = q.options[idx];
 
