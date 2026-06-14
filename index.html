@@ -272,6 +272,20 @@
     box-shadow: 0 6px 14px rgba(31, 110, 106, 0.18);
   }
 
+  /* When a new question is rendered, the browser re-evaluates :hover against
+     the cursor's last known position even though the cursor hasn't moved.
+     If a previous screen's button (e.g. "Start Game") sat at the same
+     coordinates as a new answer button, that answer button would instantly
+     show the hover style - whose teal border color matches the "correct"
+     highlight, making it look pre-selected. #answers briefly gets the
+     "settling" class right after render to neutralize the hover style back
+     to the normal resting state until the cursor genuinely moves. */
+  .answers.settling .answer-btn:hover:not(:disabled) {
+    border-color: var(--sand-deep);
+    transform: none;
+    box-shadow: none;
+  }
+
   .answer-btn:active:not(:disabled) {
     transform: scale(0.985);
   }
@@ -758,6 +772,14 @@
     // and the explanation always match the right answer)
     const answersEl = document.getElementById("answers");
     answersEl.innerHTML = "";
+
+    // Block the stale-:hover-after-render effect (see CSS comment above)
+    // until the cursor actually moves or a couple of frames have passed.
+    answersEl.classList.add("settling");
+    const clearSettling = () => answersEl.classList.remove("settling");
+    window.addEventListener("pointermove", clearSettling, { once: true });
+    requestAnimationFrame(() => requestAnimationFrame(clearSettling));
+
     const displayOrder = shuffle(q.options.map((_, idx) => idx));
     displayOrder.forEach(idx => {
       const opt = q.options[idx];
