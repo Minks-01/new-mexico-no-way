@@ -682,7 +682,22 @@
     return icon;
   }
 
+  // Release focus from the currently focused control *before* it gets
+  // hidden (display:none) or replaced. If a focused element is hidden while
+  // still focused, some browsers (notably Safari/WebKit) shift focus to the
+  // next focusable element in DOM order instead of <body> - which can land
+  // on the first answer button and show its focus ring (the same teal used
+  // for "correct") before the player has clicked anything. Explicitly
+  // blurring first makes focus move to <body> in a predictable, cross-browser way.
+  function blurActive() {
+    const active = document.activeElement;
+    if (active && active !== document.body && typeof active.blur === "function") {
+      active.blur();
+    }
+  }
+
   function showScreen(id) {
+    blurActive();
     document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
     const el = document.getElementById(id);
     el.classList.remove("active");
@@ -706,6 +721,11 @@
   }
 
   function renderQuestion() {
+    // Drop focus from whatever control triggered this render (e.g. the
+    // "Next Question" button, which is about to be hidden) so the browser
+    // doesn't auto-shift focus onto a freshly created answer button.
+    blurActive();
+
     answered = false;
     const q = order[currentIndex];
     const total = order.length;
@@ -862,6 +882,16 @@
   document.getElementById("next-btn").addEventListener("click", nextQuestion);
   document.getElementById("play-again-btn").addEventListener("click", startGame);
   document.getElementById("share-btn").addEventListener("click", shareScore);
+
+  // If the page is restored from the back-forward cache (bfcache) on
+  // mobile Safari/Chrome, any focus the browser tries to restore to a
+  // previously focused/highlighted control could re-show a stale focus
+  // ring. Drop focus on restore so no control appears highlighted.
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) {
+      blurActive();
+    }
+  });
 </script>
 </body>
 </html>
