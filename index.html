@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Mexico: No Way?!</title>
+<style>
+  :root {
+    --sand: #f7ecd9;
+    --sand-deep: #ecd9bc;
+    --card: #fffaf1;
+    --terracotta: #c1572d;
+    --terracotta-text: #a8481f;
+    --sunset: #f0904a;
+    --turquoise: #3aa8a0;
+    --turquoise-text: #1f6e6a;
+    --ink: #3a2c22;
+    --ink-soft: #5d4a3a;
+    --correct: #1f6e6a;
+    --incorrect: #a8481f;
+    --btn-grad-start: #b85a2a;
+    --btn-grad-end: #8a3414;
+    --shadow: 0 10px 30px rgba(80, 50, 20, 0.12);
+    --radius: 22px;
+    --focus-ring: #1f6e6a;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: radial-gradient(circle at top, #fff6e8 0%, var(--sand) 45%, var(--sand-deep) 100%);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #app {
+    width: 100%;
+    max-width: 460px;
+  }
+
+  .screen {
+    display: none;
+    flex-direction: column;
+    gap: 18px;
+    animation: fadeUp 0.45s ease both;
+  }
+
+  .screen.active {
+    display: flex;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---------- START SCREEN ---------- */
+  .start-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 40px 28px;
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+
+  .pepper {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  h1 {
+    font-size: 1.7rem;
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+    color: var(--terracotta-text);
+  }
+
+  .subtitle {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0 0 14px;
+    color: var(--turquoise-text);
+  }
+
+  .description {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    margin: 0 0 28px;
+  }
+
+  /* ---------- BUTTONS ---------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    border: none;
+    border-radius: 16px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-family: inherit;
+    padding: 18px 20px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn:focus-visible {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 3px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--btn-grad-start), var(--btn-grad-end));
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(138, 52, 20, 0.35);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(138, 52, 20, 0.4);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 6px 14px rgba(138, 52, 20, 0.35);
+  }
+
+  /* ---------- QUIZ SCREEN ---------- */
+  .quiz-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 4px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+  }
+
+  .score-pill {
+    background: var(--card);
+    border-radius: 999px;
+    padding: 6px 14px;
+    box-shadow: var(--shadow);
+    color: var(--turquoise-text);
+    font-weight: 800;
+  }
+
+  .progress-track {
+    width: 100%;
+    height: 10px;
+    background: var(--sand-deep);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--turquoise), var(--sunset));
+    border-radius: 999px;
+    width: 0%;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .question-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 26px 22px;
+    box-shadow: var(--shadow);
+  }
+
+  /* ---------- PLACE IDENTITY ---------- */
+  .place-block {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 10px;
+    font-size: 1.3rem;
+  }
+
+  .place-icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--terracotta-text);
+  }
+
+  .place-icon svg {
+    display: block;
+    width: auto;
+    height: 1.4em;
+  }
+
+  .place-name {
+    font-size: 1em;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--terracotta-text);
+    margin: 0;
+  }
+
+  .question-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.5;
+    margin: 0;
+    color: var(--ink);
+  }
+
+  .answers {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .answer-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    background: var(--card);
+    border: 2px solid var(--sand-deep);
+    border-radius: 16px;
+    padding: 16px 18px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    font-family: inherit;
+    text-align: left;
+    color: var(--ink);
+    cursor: pointer;
+    transition: border-color 0.15s ease, transform 0.12s ease, background 0.2s ease, box-shadow 0.15s ease;
+    line-height: 1.45;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .answer-text {
+    flex: 1;
+  }
+
+  .answer-icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 1.05rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .answer-btn:hover:not(:disabled) {
+    border-color: var(--turquoise-text);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(31, 110, 106, 0.18);
+  }
+
+  .answer-btn:active:not(:disabled) {
+    transform: scale(0.985);
+  }
+
+  .answer-btn:focus-visible {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  .answer-btn:disabled {
+    cursor: default;
+  }
+
+  .answer-btn.correct {
+    background: rgba(31, 110, 106, 0.14);
+    border-color: var(--correct);
+    border-width: 3px;
+    color: var(--turquoise-text);
+    font-weight: 700;
+  }
+
+  .answer-btn.correct .answer-icon {
+    background: var(--turquoise-text);
+    color: #fff;
+  }
+
+  .answer-btn.incorrect {
+    background: rgba(168, 72, 31, 0.14);
+    border-color: var(--incorrect);
+    border-width: 3px;
+    color: var(--terracotta-text);
+    font-weight: 700;
+  }
+
+  .answer-btn.incorrect .answer-icon {
+    background: var(--terracotta-text);
+    color: #fff;
+  }
+
+  .answer-btn.dim {
+    opacity: 0.6;
+  }
+
+  /* ---------- FEEDBACK ---------- */
+  .feedback {
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    box-shadow: var(--shadow);
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .feedback.correct {
+    background: rgba(31, 110, 106, 0.12);
+    border: 2px solid var(--turquoise-text);
+  }
+
+  .feedback.incorrect {
+    background: rgba(168, 72, 31, 0.1);
+    border: 2px solid var(--terracotta-text);
+  }
+
+  .feedback-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin: 0 0 8px;
+  }
+
+  .feedback.correct .feedback-title { color: var(--turquoise-text); }
+  .feedback.incorrect .feedback-title { color: var(--terracotta-text); }
+
+  .feedback-fact {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0;
+    color: var(--ink-soft);
+  }
+
+  .feedback-fact strong {
+    color: var(--ink);
+  }
+
+  /* ---------- FINAL SCREEN ---------- */
+  .final-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 40px 28px;
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+
+  .final-card .pepper {
+    font-size: 3.6rem;
+  }
+
+  .final-score {
+    font-size: 3.2rem;
+    font-weight: 800;
+    color: var(--terracotta-text);
+    margin: 4px 0 8px;
+    line-height: 1;
+  }
+
+  .final-score span {
+    font-size: 1.6rem;
+    color: var(--ink-soft);
+    font-weight: 700;
+  }
+
+  .verdict {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--turquoise-text);
+    margin: 4px 0 22px;
+    line-height: 1.4;
+  }
+
+  .share-text {
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    margin: 0 0 22px;
+    line-height: 1.55;
+  }
+
+  .btn-secondary {
+    background: transparent;
+    border: 2px solid var(--turquoise-text);
+    color: var(--turquoise-text);
+    margin-top: 12px;
+  }
+
+  .btn-secondary:hover {
+    background: rgba(31, 110, 106, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  .share-status {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--turquoise-text);
+    margin: 10px 0 0;
+    min-height: 1.2em;
+  }
+
+  @media (min-width: 540px) {
+    h1 { font-size: 2rem; }
+    .place-block { font-size: 1.55rem; }
+    .question-text { font-size: 1.25rem; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- START SCREEN -->
+  <div class="screen active" id="screen-start">
+    <div class="start-card">
+      <span class="pepper" aria-hidden="true">🌶️</span>
+      <h1>New Mexico: No Way?!</h1>
+      <p class="subtitle">7 things that sound fake but are actually true.</p>
+      <p class="description">Think you know New Mexico? Even locals might not ace this quiz.</p>
+      <button class="btn btn-primary" id="start-btn">Start Game</button>
+    </div>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div class="screen" id="screen-quiz">
+    <div class="quiz-topbar">
+      <span id="progress-label">Question 1 of 7</span>
+      <span class="score-pill" id="score-pill" aria-live="polite">Score: 0</span>
+    </div>
+    <div class="progress-track" id="progress-track" role="progressbar" aria-label="Quiz progress" aria-valuemin="1" aria-valuemax="7" aria-valuenow="1">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+
+    <div class="question-card" id="question-card">
+      <div class="place-block">
+        <div class="place-icon" id="place-icon" aria-hidden="true"></div>
+        <p class="place-name" id="place-name"></p>
+      </div>
+      <p class="question-text" id="question-text"></p>
+    </div>
+
+    <div class="answers" id="answers"></div>
+
+    <div class="feedback" id="feedback" role="status" aria-live="polite" style="display:none;">
+      <p class="feedback-title" id="feedback-title"></p>
+      <p class="feedback-fact" id="feedback-fact"></p>
+    </div>
+
+    <button class="btn btn-primary" id="next-btn" style="display:none;">Next Question</button>
+  </div>
+
+  <!-- FINAL SCREEN -->
+  <div class="screen" id="screen-final">
+    <div class="final-card">
+      <span class="pepper" aria-hidden="true">🌶️</span>
+      <div class="final-score" id="final-score">0<span>/7</span></div>
+      <p class="verdict" id="final-verdict"></p>
+      <p class="share-text">Share your score and challenge someone else.</p>
+      <button class="btn btn-primary" id="play-again-btn">Play Again</button>
+      <button class="btn btn-secondary" id="share-btn">Share Score</button>
+      <p class="share-status" id="share-status" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const QUESTIONS = [
+    {
+      place: "Capulin Volcano",
+      question: "Which of these would you bet is true?",
+      options: [
+        "People have proposed marriage there because they say the view makes them emotional.",
+        "Some visitors become obsessed with counting how many states they think they can see.",
+        "The biggest complaint in reviews is that there are too many crowds.",
+        "Visitors are not allowed to walk around the crater."
+      ],
+      correct: 1,
+      fact: "On exceptionally clear days, visitors report seeing parts of New Mexico, Colorado, Oklahoma, and Texas from the rim."
+    },
+    {
+      place: "White Sands",
+      question: "Which assumption would park staff most like visitors to rethink?",
+      options: [
+        "Cloud cover means less need for sunglasses and sunscreen.",
+        "The dunes are closed during the hottest part of the day.",
+        "You need special footwear to visit.",
+        "Wildlife is the biggest safety concern."
+      ],
+      correct: 0,
+      fact: "Even when temperatures feel comfortable, reflected sunlight from the gypsum can increase sun exposure. Sunglasses, sunscreen, and water are highly recommended."
+    },
+    {
+      place: "Taos Pueblo",
+      question: "Which statement sounds fake but is actually true?",
+      options: [
+        "Some historic homes still don't have electricity or running water inside.",
+        "Visitors can rent rooms inside the oldest buildings.",
+        "The pueblo closes for the entire winter season.",
+        "The oldest buildings were rebuilt in the 1950s."
+      ],
+      correct: 0,
+      fact: "Some families choose to preserve traditional ways of life within the historic structures."
+    },
+    {
+      place: "Albuquerque",
+      question: "Which statement is true?",
+      options: [
+        "The Balloon Fiesta started with just 13 balloons.",
+        "The Balloon Fiesta originally took place in Santa Fe.",
+        "Pilots compete by landing on shopping mall rooftops.",
+        "Every balloon must represent a different country."
+      ],
+      correct: 0,
+      fact: "The Balloon Fiesta began in 1972 as part of a local radio station celebration and has grown into the world's largest hot-air balloon festival."
+    },
+    {
+      place: "Bisti-De-Na-Zin",
+      question: "Which statement would surprise you the most?",
+      options: [
+        "Fossils from ancient ecosystems have been found there.",
+        "The landscape was formed by glaciers.",
+        "The area contains active geysers.",
+        "The formations are rebuilt after storms."
+      ],
+      correct: 0,
+      fact: "Millions of years ago, this area was lush and swampy, home to ancient plants and animals very different from today's New Mexico."
+    },
+    {
+      place: "Cloudcroft",
+      question: "Which statement is actually true?",
+      options: [
+        "The town was promoted as a mountain retreat for people escaping the Texas heat.",
+        "The village was founded because of gold mining.",
+        "Snow has never been recorded there.",
+        "It sits lower than Albuquerque."
+      ],
+      correct: 0,
+      fact: "Cloudcroft was developed in the late 1800s as a cool summer escape, especially for visitors arriving by train from West Texas."
+    },
+    {
+      place: "Roswell",
+      question: "Which statement is true?",
+      options: [
+        "The famous 1947 military press release originally mentioned recovering a 'flying disc.'",
+        "The city officially states that aliens landed there.",
+        "Roswell's airport runway was built for UFO tourism.",
+        "Every local business must display alien decorations."
+      ],
+      correct: 0,
+      fact: "The original Army press release used the phrase 'flying disc' before the explanation changed to a weather balloon."
+    }
+  ];
+
+  // ---------- LOCATION IDENTITY ----------
+  // Approved icon set, recreated as inline SVGs on a shared 64x64 grid with
+  // a consistent stroke weight. Stored in a single ICONS constant and reused
+  // everywhere a location header is rendered.
+  const ICON_ATTRS = 'viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"';
+
+  const ICONS = {
+    // Adobe pueblo: stepped terraces with viga beams, a window/door, and a ladder.
+    // Cropped viewBox (vs. the shared 0 0 64 64 grid) renders this icon ~18% larger
+    // than the others while keeping the artwork itself unchanged.
+    "Taos Pueblo": `<svg ${ICON_ATTRS} viewBox="-5 10 54 54">
+      <path d="M4 56h40"/>
+      <rect x="8" y="40" width="16" height="16"/>
+      <rect x="20" y="28" width="14" height="12"/>
+      <rect x="30" y="18" width="10" height="10"/>
+      <path d="M8 40v-3M12 40v-3M16 40v-3M20 40v-3"/>
+      <path d="M20 28v-3M24 28v-3M28 28v-3M32 28v-3"/>
+      <path d="M30 18v-3M34 18v-3M38 18v-3"/>
+      <rect x="12" y="46" width="4" height="6"/>
+      <path d="M26 40v-4h4v4"/>
+      <path d="M36 56V42M40 56V42M36 43h4M36 46h4M36 50h4"/>
+    </svg>`,
+
+    // Hot-air balloon: gored envelope, ropes, basket, and ground line.
+    // Slightly cropped viewBox renders this ~7% larger for consistency with the rest.
+    "Albuquerque": `<svg ${ICON_ATTRS} viewBox="2 3 60 60">
+      <path d="M32 6c11 0 18 9 18 18 0 10-7 18-18 18S14 34 14 24C14 15 21 6 32 6z"/>
+      <path d="M22 12c-2 5-3 8-3 12s1 9 3 14M42 12c2 5 3 8 3 12s-1 9-3 14M32 6v36"/>
+      <path d="M24 42l-3 10M40 42l3 10"/>
+      <rect x="24" y="52" width="16" height="8" rx="1"/>
+      <path d="M4 60h56"/>
+    </svg>`,
+
+    // Pine tree with a mountain range behind it.
+    "Cloudcroft": `<svg ${ICON_ATTRS}>
+      <path d="M18 6l-9 13h5l-8 12h24l-8-12h5z"/>
+      <path d="M18 31v10"/>
+      <path d="M2 50l12-10 8 6 10-8 14 10"/>
+    </svg>`,
+
+    // Dormant volcano: broad rounded silhouette, wide oval crater, and short
+    // contour lines descending the slopes.
+    "Capulin Volcano": `<svg ${ICON_ATTRS}>
+      <path d="M1 46c9-2 17-10 23-20 4-7 12-7 16 0 6 10 14 18 23 20"/>
+      <ellipse cx="32" cy="22" rx="12" ry="3"/>
+      <path d="M22 23q10 5 20 0"/>
+      <path d="M23 31q-3 6-6 11"/>
+      <path d="M32 29v12"/>
+      <path d="M41 31q3 6 6 11"/>
+    </svg>`,
+
+    // Flowing dune ridgelines.
+    "White Sands": `<svg ${ICON_ATTRS}>
+      <path d="M2 26c8-9 16 5 24-3s16-7 24 2"/>
+      <path d="M2 38c8-7 16 5 24-2s16-7 24 3"/>
+      <path d="M2 50c8-6 16 4 24-1s16-6 24 4"/>
+    </svg>`,
+
+    // Hoodoo rock formations on a ground line.
+    "Bisti-De-Na-Zin": `<svg ${ICON_ATTRS}>
+      <path d="M4 56h56"/>
+      <path d="M14 56V32c0-3 9-3 9 0v2c0 4.5 9 4.5 9 0v-7c0-3 9-3 9 0v29"/>
+      <path d="M46 56V42c0-3 7-3 7 0v14"/>
+    </svg>`,
+
+    // Classic UFO with dome, lights, and sparkles.
+    "Roswell": `<svg ${ICON_ATTRS}>
+      <ellipse cx="32" cy="36" rx="26" ry="7"/>
+      <path d="M14 35c0-12 36-12 36 0"/>
+      <circle cx="22" cy="37" r="1.3" fill="currentColor" stroke="none"/>
+      <circle cx="32" cy="38" r="1.3" fill="currentColor" stroke="none"/>
+      <circle cx="42" cy="37" r="1.3" fill="currentColor" stroke="none"/>
+      <path d="M28 43l1.5 5M36 43l-1.5 5"/>
+      <path d="M10 16l2.5 2.5M54 16l-2.5 2.5M32 10v3.5M6 30l3 1M58 30l-3 1"/>
+    </svg>`
+  };
+
+  const PLACE_META = {
+    "Capulin Volcano": { color: "#C75A2B", svg: ICONS["Capulin Volcano"] },
+    "White Sands": { color: "#A67B2E", svg: ICONS["White Sands"] },
+    "Taos Pueblo": { color: "#8B5E3C", svg: ICONS["Taos Pueblo"] },
+    "Albuquerque": { color: "#007C85", svg: ICONS["Albuquerque"] },
+    "Bisti-De-Na-Zin": { color: "#575757", svg: ICONS["Bisti-De-Na-Zin"] },
+    "Cloudcroft": { color: "#2E6B3A", svg: ICONS["Cloudcroft"] },
+    "Roswell": { color: "#1E3A8A", svg: ICONS["Roswell"] }
+  };
+
+  // ---------- STATE ----------
+  let order = [];
+  let currentIndex = 0;
+  let score = 0;
+  let answered = false;
+
+  // ---------- HELPERS ----------
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function makeIcon(symbol) {
+    const icon = document.createElement("span");
+    icon.className = "answer-icon";
+    icon.setAttribute("aria-hidden", "true");
+    icon.textContent = symbol;
+    return icon;
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    const el = document.getElementById(id);
+    el.classList.remove("active");
+    // restart fade animation
+    void el.offsetWidth;
+    el.classList.add("active");
+  }
+
+  // ---------- GAME FLOW ----------
+  function startGame() {
+    order = shuffle(QUESTIONS);
+    currentIndex = 0;
+    score = 0;
+    updateScorePill();
+    showScreen("screen-quiz");
+    renderQuestion();
+  }
+
+  function updateScorePill() {
+    document.getElementById("score-pill").textContent = `Score: ${score}`;
+  }
+
+  function renderQuestion() {
+    answered = false;
+    const q = order[currentIndex];
+    const total = order.length;
+
+    document.getElementById("progress-label").textContent = `Question ${currentIndex + 1} of ${total}`;
+
+    const meta = PLACE_META[q.place] || { color: "var(--terracotta-text)", svg: "" };
+    const iconEl = document.getElementById("place-icon");
+    iconEl.innerHTML = meta.svg;
+    iconEl.style.color = meta.color;
+
+    const nameEl = document.getElementById("place-name");
+    nameEl.textContent = q.place;
+    nameEl.style.color = meta.color;
+
+    document.getElementById("question-text").textContent = q.question;
+
+    // progress bar
+    const pct = ((currentIndex + 1) / total) * 100;
+    const track = document.getElementById("progress-track");
+    track.setAttribute("aria-valuemax", String(total));
+    track.setAttribute("aria-valuenow", String(currentIndex + 1));
+    track.setAttribute("aria-valuetext", `Question ${currentIndex + 1} of ${total}`);
+    requestAnimationFrame(() => {
+      document.getElementById("progress-fill").style.width = pct + "%";
+    });
+
+    // answers
+    const answersEl = document.getElementById("answers");
+    answersEl.innerHTML = "";
+    q.options.forEach((opt, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "answer-btn";
+
+      const textSpan = document.createElement("span");
+      textSpan.className = "answer-text";
+      textSpan.textContent = opt;
+      btn.appendChild(textSpan);
+
+      btn.addEventListener("click", () => selectAnswer(idx));
+      answersEl.appendChild(btn);
+    });
+
+    // hide feedback / next button
+    document.getElementById("feedback").style.display = "none";
+    document.getElementById("next-btn").style.display = "none";
+
+    // re-trigger fade animation on the question card
+    const card = document.getElementById("question-card");
+    card.style.animation = "none";
+    void card.offsetWidth;
+    card.style.animation = "fadeUp 0.4s ease both";
+  }
+
+  function selectAnswer(selectedIdx) {
+    if (answered) return;
+    answered = true;
+
+    const q = order[currentIndex];
+    const buttons = document.querySelectorAll(".answer-btn");
+    const isCorrect = selectedIdx === q.correct;
+
+    if (isCorrect) score++;
+    updateScorePill();
+
+    buttons.forEach((btn, idx) => {
+      btn.disabled = true;
+      const opt = q.options[idx];
+
+      if (idx === q.correct) {
+        btn.classList.add("correct");
+        btn.appendChild(makeIcon("✓"));
+        btn.setAttribute("aria-label", `${opt} — Correct answer`);
+      } else if (idx === selectedIdx) {
+        btn.classList.add("incorrect");
+        btn.appendChild(makeIcon("✕"));
+        btn.setAttribute("aria-label", `${opt} — Your answer, incorrect`);
+      } else {
+        btn.classList.add("dim");
+      }
+    });
+
+    const feedback = document.getElementById("feedback");
+    const title = document.getElementById("feedback-title");
+    const fact = document.getElementById("feedback-fact");
+
+    feedback.className = "feedback " + (isCorrect ? "correct" : "incorrect");
+    title.textContent = isCorrect ? "✅ Correct!" : "❌ Not quite!";
+    fact.innerHTML = `<strong>Did you know?</strong> ${q.fact}`;
+    feedback.style.display = "block";
+
+    const nextBtn = document.getElementById("next-btn");
+    nextBtn.textContent = (currentIndex === order.length - 1) ? "See Results" : "Next Question";
+    nextBtn.style.display = "block";
+  }
+
+  function nextQuestion() {
+    if (currentIndex < order.length - 1) {
+      currentIndex++;
+      renderQuestion();
+    } else {
+      showFinal();
+    }
+  }
+
+  function showFinal() {
+    document.getElementById("final-score").innerHTML = `${score}<span>/${order.length}</span>`;
+
+    let verdict;
+    if (score <= 2) {
+      verdict = "Looks like you need another New Mexico road trip.";
+    } else if (score <= 5) {
+      verdict = "You know New Mexico better than most tourists.";
+    } else {
+      verdict = "Are you secretly a New Mexico local?";
+    }
+    document.getElementById("final-verdict").textContent = verdict;
+    document.getElementById("share-status").textContent = "";
+
+    showScreen("screen-final");
+  }
+
+  // ---------- SHARE ----------
+  async function shareScore() {
+    const statusEl = document.getElementById("share-status");
+    const text = `I scored ${score}/${order.length} on 🌶️ New Mexico: No Way?! Think you can beat me?`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ text });
+        return;
+      } catch (err) {
+        if (err && err.name === "AbortError") return;
+        // fall through to clipboard if share fails for another reason
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(text);
+      statusEl.textContent = "Score copied to clipboard!";
+    } catch (err) {
+      statusEl.textContent = text;
+    }
+  }
+
+  // ---------- EVENTS ----------
+  document.getElementById("start-btn").addEventListener("click", startGame);
+  document.getElementById("next-btn").addEventListener("click", nextQuestion);
+  document.getElementById("play-again-btn").addEventListener("click", startGame);
+  document.getElementById("share-btn").addEventListener("click", shareScore);
+</script>
+</body>
+</html>
